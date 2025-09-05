@@ -1,0 +1,169 @@
+-- Services
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+local ScreenGui = LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("ShidoMenu")
+
+-- Vérifier si le GUI existe
+if not ScreenGui then return end
+
+-- Menu principal
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0,500,0,380)
+MainFrame.Position = UDim2.new(0.25,0,0.1,0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+MainFrame.BorderColor3 = Color3.fromRGB(255,255,255)
+MainFrame.BorderSizePixel = 2
+MainFrame.Parent = ScreenGui
+
+-- Drag handle en haut
+local DragHandle = Instance.new("Frame")
+DragHandle.Size = UDim2.new(1,0,0,36)
+DragHandle.Position = UDim2.new(0,0,0,0)
+DragHandle.BackgroundColor3 = Color3.fromRGB(35,35,35)
+DragHandle.BorderSizePixel = 0
+DragHandle.Parent = MainFrame
+
+-- Bouton toggle ouverture/fermeture
+local ToggleButton = Instance.new("TextButton", ScreenGui)
+ToggleButton.Size = UDim2.new(0,50,0,50)
+ToggleButton.Position = UDim2.new(0,10,0.12,0)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(30,30,30)
+ToggleButton.TextColor3 = Color3.fromRGB(255,255,255)
+ToggleButton.Text = "≡"
+ToggleButton.Font = Enum.Font.GothamBold
+ToggleButton.TextSize = 26
+local menuOpen = true
+ToggleButton.MouseButton1Click:Connect(function()
+    menuOpen = not menuOpen
+    MainFrame.Visible = menuOpen
+end)
+
+--===================
+-- Onglets horizontaux
+--===================
+local TabBar = Instance.new("Frame", MainFrame)
+TabBar.Size = UDim2.new(1,0,0,36)
+TabBar.Position = UDim2.new(0,0,0,0)
+TabBar.BackgroundTransparency = 1
+
+local function createTab(name)
+    local btn = Instance.new("TextButton", TabBar)
+    btn.Size = UDim2.new(1/3,0,1,0)
+    btn.BackgroundColor3 = Color3.fromRGB(35,35,35)
+    btn.Text = name
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 16
+    btn.TextColor3 = Color3.fromRGB(255,255,255)
+    return btn
+end
+
+-- Créer pages
+local RewardsPage = Instance.new("Frame", MainFrame)
+RewardsPage.Size = UDim2.new(1,-20,1,-46)
+RewardsPage.Position = UDim2.new(0,10,0,40)
+RewardsPage.BackgroundTransparency = 1
+RewardsPage.Visible = true
+
+local LifePage = RewardsPage:Clone()
+LifePage.Parent = MainFrame
+LifePage.Visible = false
+
+local BoostsPage = RewardsPage:Clone()
+BoostsPage.Parent = MainFrame
+BoostsPage.Visible = false
+
+-- Créer onglets
+local tabRewards = createTab("Rewards")
+tabRewards.Position = UDim2.new(0,0,0,0)
+tabRewards.MouseButton1Click:Connect(function()
+    RewardsPage.Visible = true
+    LifePage.Visible = false
+    BoostsPage.Visible = false
+end)
+
+local tabLife = createTab("Vie")
+tabLife.Position = UDim2.new(1/3,0,0,0)
+tabLife.MouseButton1Click:Connect(function()
+    RewardsPage.Visible = false
+    LifePage.Visible = true
+    BoostsPage.Visible = false
+end)
+
+local tabBoosts = createTab("Boosts")
+tabBoosts.Position = UDim2.new(2/3,0,0,0)
+tabBoosts.MouseButton1Click:Connect(function()
+    RewardsPage.Visible = false
+    LifePage.Visible = false
+    BoostsPage.Visible = true
+end)
+
+--===================
+-- Dragging menu
+--===================
+local dragging = false
+local dragInput, mousePos, framePos
+
+local function update(input)
+    local delta = input.Position - mousePos
+    MainFrame.Position = UDim2.new(0, framePos.X + delta.X, 0, framePos.Y + delta.Y)
+end
+
+DragHandle.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        mousePos = input.Position
+        framePos = MainFrame.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+DragHandle.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        update(input)
+    end
+end)
+
+--===================
+-- Redimensionnement coin bas-droite
+--===================
+local ResizeHandle = Instance.new("Frame", MainFrame)
+ResizeHandle.Size = UDim2.new(0,18,0,18)
+ResizeHandle.Position = UDim2.new(1,-18,1,-18)
+ResizeHandle.BackgroundColor3 = Color3.fromRGB(255,255,255)
+local resizing = false
+local startMousePos, startSize
+
+ResizeHandle.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        resizing = true
+        startMousePos = UserInputService:GetMouseLocation()
+        startSize = MainFrame.AbsoluteSize
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                resizing = false
+            end
+        end)
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if resizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = UserInputService:GetMouseLocation() - startMousePos
+        MainFrame.Size = UDim2.new(0,startSize.X + delta.X,0,startSize.Y + delta.Y)
+    end
+end)
+
+-- Charger la Partie 3 (boutons Vie/Boosts)
+loadstring(game:HttpGet("https://tonlien.com/menu_part3.lua"))()
