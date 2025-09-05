@@ -166,4 +166,4 @@ UserInputService.InputChanged:Connect(function(input)
 end)
 
 -- Charger la Partie 3 (boutons Vie/Boosts)
-loadstring(game:HttpGet("https://tonlien.com/menu_part3.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/TheCutieFemboy/Loot-hero-roblox/refs/heads/main/4"))()
