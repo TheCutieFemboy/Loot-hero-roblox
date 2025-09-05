@@ -1,0 +1,45 @@
+-- Services
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+local ScreenGui = LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("ShidoMenu")
+
+if not ScreenGui then return end
+
+local MainFrame = ScreenGui:FindFirstChild("MainFrame")
+if not MainFrame then return end
+
+local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+
+-- Rewards Page
+local RewardsPage = MainFrame:FindFirstChild("Rewards") or MainFrame:FindFirstChildWhichIsA("Frame")
+
+-- Fonction safe Invoke
+local function safeInvokeReward(name)
+    pcall(function()
+        if Remotes and Remotes:FindFirstChild("Reward") then
+            Remotes.Reward:InvokeServer(name)
+        end
+    end)
+end
+
+-- Fonction pour créer bouton
+local function addButton(parent,text,callback,y)
+    local b = Instance.new("TextButton", parent)
+    b.Size = UDim2.new(1,0,0,32)
+    b.Position = UDim2.new(0,0,0,y)
+    b.BackgroundColor3 = Color3.fromRGB(45,45,45)
+    b.Font = Enum.Font.GothamBold
+    b.TextSize = 16
+    b.TextColor3 = Color3.fromRGB(255,255,255)
+    b.Text = text
+    b.MouseButton1Click:Connect(callback)
+    return b
+end
+
+-- Liste des rewards
+local rewardsList = {"Spent3000","Spent8000","Spent20000","Spent45000","Spent70000","Spent100000","Spent200000","Spent300000"}
+
+for i,r in ipairs(rewardsList) do
+    addButton(RewardsPage,r,function() safeInvokeReward(r) end,(i-1)*38)
+end
