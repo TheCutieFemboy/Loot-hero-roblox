@@ -1,0 +1,70 @@
+-- Services
+local Players = game:GetService("Players")
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "ShidoMenu"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Mode d'emploi
+local GuideFrame = Instance.new("Frame")
+GuideFrame.Size = UDim2.new(0,400,0,260)
+GuideFrame.Position = UDim2.new(0.5,-200,0.5,-130)
+GuideFrame.BackgroundColor3 = Color3.fromRGB(20,20,20)
+GuideFrame.BorderColor3 = Color3.fromRGB(255,255,255)
+GuideFrame.BorderSizePixel = 2
+GuideFrame.Parent = ScreenGui
+
+local AcceptButton = Instance.new("TextButton", GuideFrame)
+AcceptButton.Size = UDim2.new(0.5,0,0,32)
+AcceptButton.Position = UDim2.new(0.25,0,1,-42)
+AcceptButton.BackgroundColor3 = Color3.fromRGB(50,50,50)
+AcceptButton.TextColor3 = Color3.fromRGB(255,255,255)
+AcceptButton.Font = Enum.Font.GothamBold
+AcceptButton.TextSize = 16
+AcceptButton.Text = "Accepter / Accept"
+AcceptButton.Active = false
+AcceptButton.TextTransparency = 0.5
+
+-- Timeout de 3s avant activation
+task.delay(3,function()
+    AcceptButton.Active = true
+    AcceptButton.TextTransparency = 0
+end)
+
+AcceptButton.MouseButton1Click:Connect(function()
+    GuideFrame:Destroy()
+
+    -- Barre de chargement
+    local LoadingFrame = Instance.new("Frame")
+    LoadingFrame.Size = UDim2.new(1,0,1,0)
+    LoadingFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+    LoadingFrame.Parent = ScreenGui
+
+    local LoadingText = Instance.new("TextLabel", LoadingFrame)
+    LoadingText.Size = UDim2.new(1,0,0,48)
+    LoadingText.Position = UDim2.new(0,0,0.45,0)
+    LoadingText.BackgroundTransparency = 1
+    LoadingText.Font = Enum.Font.GothamBold
+    LoadingText.TextSize = 42
+    LoadingText.TextColor3 = Color3.fromRGB(255,255,255)
+    LoadingText.Text = "By Shido"
+
+    local BarBG = Instance.new("Frame", LoadingFrame)
+    BarBG.Size = UDim2.new(0.6,0,0,10)
+    BarBG.Position = UDim2.new(0.2,0,0.6,0)
+    BarBG.BackgroundColor3 = Color3.fromRGB(50,50,50)
+
+    local BarFill = Instance.new("Frame", BarBG)
+    BarFill.Size = UDim2.new(0,0,1,0)
+    BarFill.BackgroundColor3 = Color3.fromRGB(255,255,255)
+
+    for i = 1,100 do
+        BarFill.Size = UDim2.new(i/100,0,1,0)
+        task.wait(0.01)
+    end
+
+    LoadingFrame:Destroy()
+
+    -- Charger la Partie 2 (menu principal)
+    loadstring(game:HttpGet("https://tonlien.com/menu_part2.lua"))()
+end)
