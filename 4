@@ -1,0 +1,81 @@
+-- Services
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+local ScreenGui = LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("ShidoMenu")
+
+if not ScreenGui then return end
+
+local MainFrame = ScreenGui:FindFirstChild("MainFrame")
+if not MainFrame then return end
+
+local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+
+-- Pages
+local LifePage = MainFrame:FindFirstChild("Vie") or MainFrame:FindFirstChildWhichIsA("Frame")
+local BoostsPage = MainFrame:FindFirstChild("Boosts") or MainFrame:FindFirstChildWhichIsA("Frame")
+
+-- Fonction safe Fire
+local function safeFireChoice(choice)
+    pcall(function()
+        if Remotes and Remotes:FindFirstChild("Choice") then
+            Remotes.Choice:FireServer(choice)
+        end
+    end)
+end
+
+local function safeFireHeal()
+    pcall(function()
+        if Remotes and Remotes:FindFirstChild("Heal") then
+            Remotes.Heal:FireServer()
+        end
+    end)
+end
+
+-- Fonction pour créer bouton
+local function addButton(parent,text,callback,y)
+    local b = Instance.new("TextButton", parent)
+    b.Size = UDim2.new(1,0,0,32)
+    b.Position = UDim2.new(0,0,0,y)
+    b.BackgroundColor3 = Color3.fromRGB(45,45,45)
+    b.Font = Enum.Font.GothamBold
+    b.TextSize = 16
+    b.TextColor3 = Color3.fromRGB(255,255,255)
+    b.Text = text
+    b.MouseButton1Click:Connect(callback)
+    return b
+end
+
+--===================
+-- Vie Page Buttons
+--===================
+local lifeItems = {
+    {name="Tower",fn=function() safeFireChoice("Tower") end},
+    {name="Apple",fn=function() safeFireChoice("Apple") end},
+    {name="Heal",fn=function() safeFireHeal() end}
+}
+
+for i,item in ipairs(lifeItems) do
+    addButton(LifePage,item.name,item.fn,(i-1)*38)
+end
+
+--===================
+-- Boosts Page Buttons
+--===================
+local boostItems = {
+    {name="Giant",fn=function() safeFireChoice("Giant") end},
+    {name="Trident",fn=function() safeFireChoice("Trident") end},
+    {name="Tornado x6",fn=function()
+        for i=1,6 do
+            safeFireChoice("Tornado")
+            task.wait(0.05)
+        end
+    end}
+}
+
+for i,item in ipairs(boostItems) do
+    addButton(BoostsPage,item.name,item.fn,(i-1)*38)
+end
+
+-- Charger la Partie 4 (Rewards)
+loadstring(game:HttpGet("https://tonlien.com/menu_part4.lua"))()
